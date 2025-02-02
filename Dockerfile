@@ -15,4 +15,10 @@ RUN ./install.sh
 
 RUN ollama serve & \
     sleep 5 && \
-    ollama pull deepseek-r1:7B
+    ollama pull deepseek-r1:8B
+
+# Expose the API port (7860 for HF Spaces)
+EXPOSE 7860
+
+# Start Ollama on port 7860
+CMD ["ollama", "serve", "--port", "7860"]
