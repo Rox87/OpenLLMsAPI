@@ -1,15 +1,18 @@
 # Use Ubuntu as base image
-FROM alpine:latest
+FROM ubuntu:latest
 
+WORKDIR /home/ubuntu
 # Install dependencies
-RUN apk update 
+RUN apt update && apt install -y curl
 
-RUN apk add --no-cache curl
+RUN curl -fsSL https://ollama.com/install.sh -o install.sh
 
-# Install Ollama
-RUN curl -fsSL https://ollama.com/install.sh | sh
+# Dê permissão de execução ao script
+RUN chmod +x install.sh
 
-# Expose Ollama's API port
-EXPOSE 11434
+# Execute o script de instalação
+RUN ./install.sh
 
-RUN ollama serve & sleep 5 && ollama pull deepseek-r1:8b
+RUN ollama serve & \
+    sleep 5 && \
+    ollama pull deepseek-r1:7B
