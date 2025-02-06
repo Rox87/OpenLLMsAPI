@@ -3,17 +3,21 @@ from fastapi.responses import StreamingResponse
 from stream import data_streamer, pull_model_stream, list_model_stream
 from inference.inferences import data_wait
 from models import RequestBody
-from myvars.prompts import prepare
 import subprocess
 import time
-sync_running = 0
+import configparser
+
+# Criando um arquivo de configuração
+config = configparser.ConfigParser()
+
+config.read('src/config.ini',encoding='utf-8')
 
 app = FastAPI()
 
 @app.post('/inference')
 async def inference(req:RequestBody):
     print('waitable inference start')
-    prompt = f"{prepare} {req.prompt}"
+    prompt = f"{config['Prompts']['prepare_prompt']} {req.prompt}"
     print(f"model:{req.model}")
     print(f"prompt:{prompt}")
     return await data_wait(prompt=prompt,model=req.model)
@@ -21,7 +25,7 @@ async def inference(req:RequestBody):
 @app.post('/stream')
 async def stream(req:RequestBody):
     print('stream start')
-    prompt = f"{prepare} {req.prompt}"
+    prompt = f"{config['Prompts']['prepare_prompt']} {req.prompt}"
     print(f"model:{req.model}")
     print(f"prompt:{prompt}")
     return StreamingResponse(data_streamer(prompt=prompt,model=req.model), media_type='text/event-stream')

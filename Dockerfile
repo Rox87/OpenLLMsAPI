@@ -19,15 +19,14 @@ RUN chmod +x install.sh && \
 
 ### Install models here ###
 
-RUN ollama serve & \
-    while ! nc -z localhost 11434; do sleep 1; done && \
-    ollama cp 
-    #   ollama pull qwen2.5:0.5b
+# RUN ollama serve & \
+#     while ! nc -z localhost 11434; do sleep 1; done && \
+#     ollama pull qwen2.5:0.5b
 
 # Copia o diretório `src` para o container
 COPY ./src ./src
 
-RUN ./src/sync_volumes.sh
+RUN 
 
 # Instala as dependências do projeto usando o arquivo requirements.txt, evitando o uso de cache
 RUN pip install --no-cache-dir -r ./src/requirements.txt
@@ -38,4 +37,4 @@ EXPOSE 8000
 # Comando de inicialização do container:
 # 1. Inicia o servidor Ollama em segundo plano
 # 2. Executa o serviço FastAPI definido no arquivo `ollama.fastapi.stream.py`
-CMD ["sh", "-c","ollama serve & python src/main.py"]
+CMD ["sh", "-c","./src/sync_volumes.sh & ollama serve & python src/main.py"]

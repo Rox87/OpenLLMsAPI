@@ -1,1 +1,0 @@
-prepare="Responda em português: "
