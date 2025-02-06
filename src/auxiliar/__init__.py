@@ -1,0 +1,1 @@
+from auxiliar.all import rm_first_line, remove_inside_tag, float_para_porcentagem, calcular_media
