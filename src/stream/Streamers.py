@@ -56,7 +56,7 @@ async def pull_model_stream(model):
 
             download_progress = float_para_porcentagem(calcular_media(p_list))
 
-            print(download_progress)
+            print(f"download_progress:{download_progress}")
 
             with open('src/data/pull_data.json','r') as f:
                 pull_data = json.load(f)
@@ -68,13 +68,15 @@ async def pull_model_stream(model):
             if download_progress=='100%' and m == 0:
                 ready = sync()
                 pull_data[model] = 1
-                ready = True
+                step = "ready"
                 with open('src/data/pull_data.json','w') as f:
                     f.write(json.dumps(pull_data))
+            elif download_progress=='100%':
+                step = "sync"
             else:
-                ready = False
+                step = "downloading..."
                 
-            return '{' + f'\"model\":"\"{model}\", \"download_progress\": \"{download_progress}\", \"ready\": \"{ready}\"' + '}'
+            return '{' + f'\"model\":"\"{model}\", \"download_progress\": \"{download_progress}\", \"step\": \"{step}\"' + '}'
             
 
 
