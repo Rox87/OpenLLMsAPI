@@ -4,6 +4,9 @@ from stream import data_streamer, pull_model_stream, list_model_stream
 from inference.inferences import data_wait
 from models import RequestBody
 from myvars.prompts import prepare
+import subprocess
+import time
+sync_running = 0
 
 app = FastAPI()
 
@@ -27,12 +30,38 @@ async def stream(req:RequestBody):
 async def download(model: str):
     print('download start')
     print(f"model:{model}")
-    return StreamingResponse(await pull_model_stream(model), media_type='text/event-stream')
+    return await pull_model_stream(model)
 
 @app.post("/list")
 async def list_models():
     print('list models start')
-    return StreamingResponse(await list_model_stream(), media_type='text/event-stream')
+    return await list_model_stream()
+@app.post("/teste/{command}")
+async def run_command(command):
+    """Executa um comando de forma assíncrona"""
+    process = subprocess.Popen(
+            ['python','src/teset.py'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Captura stdout e stderr juntos
+            text=True,
+            bufsize=1,  # Linha a linha
+            universal_newlines=True,
+            encoding="utf-8",  # Define a codificação UTF-8
+            errors="ignore"  # Ignora caracteres que não podem ser decodificados
+        )
+    log = ""
+    
+    # Aguarda o tempo limite sem matar o processo
+    start_time = time.time()
+    while time.time() - start_time < 1:
+        # Captura a saída em tempo real
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            log += output  # Adiciona a linha à variável log
+
+    return log
 
 if __name__ == "__main__":
     import uvicorn

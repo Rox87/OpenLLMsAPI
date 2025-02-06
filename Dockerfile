@@ -2,10 +2,10 @@
 FROM python:slim-bookworm 
 
 # Define o diretório de trabalho dentro do container como /home/ubuntu
-WORKDIR /home/ubuntu
+WORKDIR /home/dataocean
 
 # Atualiza os pacotes do sistema e instala o curl e netcat-traditional
-RUN apt update && apt install -y curl netcat-traditional
+RUN apt update && apt install -y curl netcat-traditional rsync
 
 # Copia o script de instalação para o container
 COPY install.sh .
@@ -18,12 +18,16 @@ RUN chmod +x install.sh && \
 # depois faz o pull do modelo `deepseek-r1:1.5b`
 
 ### Install models here ###
-#RUN ollama serve & \
-#    while ! nc -z localhost 11434; do sleep 1; done && \
-#    ollama pull deepseek-r1:1.5b
+
+RUN ollama serve & \
+    while ! nc -z localhost 11434; do sleep 1; done && \
+    ollama cp 
+    #   ollama pull qwen2.5:0.5b
 
 # Copia o diretório `src` para o container
 COPY ./src ./src
+
+RUN ./src/sync_volumes.sh
 
 # Instala as dependências do projeto usando o arquivo requirements.txt, evitando o uso de cache
 RUN pip install --no-cache-dir -r ./src/requirements.txt

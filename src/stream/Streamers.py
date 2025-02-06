@@ -2,8 +2,7 @@ import ollama
 import time
 import subprocess
 from auxiliar import calcular_media, float_para_porcentagem
-from sync_volumes import sync
-import json
+
 
 async def data_streamer(prompt, model):
     try:
@@ -56,35 +55,13 @@ async def pull_model_stream(model):
 
             download_progress = float_para_porcentagem(calcular_media(p_list))
 
-            print(f"download_progress:{download_progress}")
-            pull_data = '{}'
-            
-            with open('src/data/pull_data.json','r') as f:
-                pull_data = json.load(f)
-                retry=5
-                while len(pull_data) < 2 and retry > 0:
-                    retry-=1
-                    with open('src/data/pull_data.json','r') as f:
-                        pull_data = json.load(f)
-                
-                    
-            try:
-                m = pull_data['model']
-            except:
-                m = 0
+            ready = False
+            if download_progress=='100%':
+                ready = True
 
-            if download_progress=='100%' and m == 0:
-                ready = sync()
-                pull_data[model] = 1
-                step = "ready"
-                with open('src/data/pull_data.json','w') as f:
-                    f.write(json.dumps(pull_data))
-            elif download_progress=='100%':
-                step = "sync"
-            else:
-                step = "downloading..."
+            print(f"download_progress:{download_progress}")
                 
-            return '{' + f'\"model\":"\"{model}\", \"download_progress\": \"{download_progress}\", \"step\": \"{step}\"' + '}'
+            return {"model":model,"download_progress":download_progress, "ready": ready}
             
 
 
@@ -111,4 +88,4 @@ async def list_model_stream():
                 h+=1
             else:
                 models_list.append(line.split()[0])
-        return '{' + "\"models\":" + f"{models_list}" + '}'
+        return {"models":models_list}
