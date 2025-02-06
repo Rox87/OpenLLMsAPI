@@ -36,11 +36,11 @@ async def download(model: str):
 async def list_models():
     print('list models start')
     return await list_model_stream()
-@app.post("/teste/{command}")
-async def run_command(command):
+@app.post("/force_sync")
+async def force_sync():
     """Executa um comando de forma assíncrona"""
     process = subprocess.Popen(
-            ['python','src/teset.py'],
+            ['./src/sync_volumes.py'],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Captura stdout e stderr juntos
             text=True,
@@ -55,7 +55,7 @@ async def run_command(command):
     start_time = time.time()
     while time.time() - start_time < 1:
         # Captura a saída em tempo real
-        output = process.stdout.readline()
+        output = process.stdout.read()
         if output == '' and process.poll() is not None:
             break
         if output:
