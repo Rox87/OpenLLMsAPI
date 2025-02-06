@@ -57,9 +57,17 @@ async def pull_model_stream(model):
             download_progress = float_para_porcentagem(calcular_media(p_list))
 
             print(f"download_progress:{download_progress}")
-
+            pull_data = '{}'
+            
             with open('src/data/pull_data.json','r') as f:
                 pull_data = json.load(f)
+                retry=5
+                while len(pull_data) < 2 and retry > 0:
+                    retry-=1
+                    with open('src/data/pull_data.json','r') as f:
+                        pull_data = json.load(f)
+                
+                    
             try:
                 m = pull_data['model']
             except:
