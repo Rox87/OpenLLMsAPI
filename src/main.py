@@ -40,10 +40,20 @@ async def download(model: str):
 async def list_models():
     print('list models start')
     return await list_model_stream()
-@app.post("/force_sync")
+
+executando = False  # Controle de execução
+
+@app.get("/force_sync")
 async def force_sync():
-    """Executa um comando de forma assíncrona"""
-    process = subprocess.Popen(
+    global executando
+    if executando:
+        return {"message": "Já existe um processo de syncronização em execução. Ignorando chamada."}
+    
+    executando = True
+    
+    try:
+        print("Executando processo...")
+        process = subprocess.Popen(
             ['./src/sync_volumes.py'],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Captura stdout e stderr juntos
@@ -53,19 +63,23 @@ async def force_sync():
             encoding="utf-8",  # Define a codificação UTF-8
             errors="ignore"  # Ignora caracteres que não podem ser decodificados
         )
-    log = ""
-    
-    # Aguarda o tempo limite sem matar o processo
-    start_time = time.time()
-    while time.time() - start_time < 1:
-        # Captura a saída em tempo real
-        output = process.stdout.read()
-        if output == '' and process.poll() is not None:
-            break
-        if output:
-            log += output  # Adiciona a linha à variável log
+        log = ""
+        
+        # Aguarda o tempo limite sem matar o processo
+        start_time = time.time()
+        while time.time() - start_time < 1:
+            # Captura a saída em tempo real
+            output = process.stdout.read()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                log += output  # Adiciona a linha à variável log
+        print("Processo de syncronização em execução ou finalizado.")
 
-    return log
+        return log
+    
+    finally:
+        executando = False  # Libera para novas execuções
 
 if __name__ == "__main__":
     import uvicorn
